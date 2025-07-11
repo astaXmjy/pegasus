@@ -1,6 +1,6 @@
 class AppStrings {
-  static const appName = 'StyleSwap AI';
-  static const homeTitle = 'StyleSwap AI';
+  static const appName = 'Dora';
+  static const homeTitle = 'Dora';
   static const unleashStyle = 'Unleash Your Style';
   static const uploadDescription =
       'Upload a photo to virtually try on new outfits!';

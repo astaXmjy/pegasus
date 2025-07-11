@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/wardrobe_provider.dart';
 import '../../widgets/common/category_chips.dart';
 import '../../widgets/cards/clothing_item_card.dart';
+import 'package:go_router/go_router.dart';
 
 class WardrobeScreen extends StatefulWidget {
   const WardrobeScreen({Key? key}) : super(key: key);
@@ -30,6 +31,14 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       appBar: AppBar(
         title: const Text(AppStrings.yourWardrobe),
         actions: [
+          // ADD THIS DEBUG BUTTON TEMPORARILY
+          IconButton(
+            onPressed: () {
+              debugPrint('🧹 DEBUG: Clearing all data...');
+              context.read<WardrobeProvider>().clearAllData();
+            },
+            icon: const Icon(Icons.delete_forever, color: Colors.red),
+          ),
           IconButton(
             onPressed: _addNewClothing,
             icon: const Icon(Icons.add),
@@ -39,6 +48,23 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ADD THIS DEBUG INFO WIDGET
+          Consumer<WardrobeProvider>(
+            builder: (context, provider, child) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                color: Colors.blue.withOpacity(0.2),
+                child: Text(
+                  'DEBUG: ${provider.clothingItems.length} total items, '
+                  '${provider.filteredClothingItems.length} filtered items, '
+                  'Category: ${provider.selectedCategory}',
+                  style: const TextStyle(fontSize: 12, color: Colors.white),
+                ),
+              );
+            },
+          ),
+
           const Padding(
             padding: EdgeInsets.only(
               left: AppStyles.defaultPadding,
@@ -147,23 +173,12 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
   }
 
   void _addNewClothing() {
-    // TODO: Navigate to add clothing screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Add new clothing feature coming soon!'),
-        backgroundColor: AppColors.primaryPurple,
-      ),
-    );
+    context.push('/wardrobe/add');
   }
 
   void _viewClothingItem(String itemId) {
-    // TODO: Navigate to clothing item detail screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Viewing clothing item: $itemId'),
-        backgroundColor: AppColors.primaryPurple,
-      ),
-    );
+    print("view_clothing");
+    context.push('/wardrobe/item/$itemId');
   }
 
   void _toggleFavorite(String itemId) {
@@ -177,13 +192,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
   }
 
   void _editClothingItem(String itemId) {
-    // TODO: Navigate to edit clothing screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Editing clothing item: $itemId'),
-        backgroundColor: AppColors.warning,
-      ),
-    );
+    context.push('/wardrobe/edit/${itemId}');
   }
 
   void _deleteClothingItem(String itemId) {

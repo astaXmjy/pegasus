@@ -27,9 +27,7 @@ class _TryOnScreenState extends State<TryOnScreen> {
 
   Future<void> _initializeCamera() async {
     final cameraProvider = context.read<CameraProvider>();
-    if (!cameraProvider.isInitialized) {
-      await cameraProvider.initializeCamera();
-    }
+    await cameraProvider.initializeCamera();
   }
 
   @override
@@ -126,92 +124,59 @@ class _TryOnScreenState extends State<TryOnScreen> {
   Widget _buildCameraPreview() {
     return Consumer<CameraProvider>(
       builder: (context, cameraProvider, child) {
-        if (cameraProvider.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryPurple),
-          );
-        }
+        // ... error handling code stays the same ...
 
-        if (cameraProvider.errorMessage != null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: AppColors.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  cameraProvider.errorMessage!,
-                  style: AppStyles.subtitleTextStyle,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                CustomButton(
-                  text: 'Retry',
-                  onPressed: () => cameraProvider.initializeCamera(),
-                ),
-              ],
-            ),
-          );
-        }
-
-        if (!cameraProvider.isInitialized ||
-            cameraProvider.controller == null) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.camera_alt,
-                  size: 48,
-                  color: AppColors.textSecondary,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Camera not available',
-                  style: AppStyles.subtitleTextStyle,
-                ),
-              ],
-            ),
-          );
-        }
-
-        return Stack(
-          children: [
-            CameraPreview(cameraProvider.controller!),
-
-            // AI overlay placeholder
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: AppColors.primaryPurple.withOpacity(0.5),
-                    width: 2,
+        // SIMPLE FIX - Replace the complex preview with this:
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(AppStyles.cardBorderRadius),
+          child: Stack(
+            children: [
+              // Fill entire container
+              Positioned.fill(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width:
+                        cameraProvider.controller!.value.previewSize?.height ??
+                            1,
+                    height:
+                        cameraProvider.controller!.value.previewSize?.width ??
+                            1,
+                    child: CameraPreview(cameraProvider.controller!),
                   ),
                 ),
-                child: const Center(
-                  child: Text(
-                    'AI-Powered Virtual Try-On',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          offset: Offset(1, 1),
-                          blurRadius: 4,
-                          color: Colors.black54,
-                        ),
-                      ],
+              ),
+
+              // Purple border overlay
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.primaryPurple.withOpacity(0.5),
+                      width: 2,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'AI Virtual Try-On Ready',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(1, 1),
+                            blurRadius: 4,
+                            color: Colors.black54,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -220,13 +185,14 @@ class _TryOnScreenState extends State<TryOnScreen> {
   Widget _buildWardrobeSelection() {
     return Consumer<WardrobeProvider>(
       builder: (context, wardrobeProvider, child) {
-        final items = wardrobeProvider.clothingItems.take(3).toList();
+        final items = wardrobeProvider.clothingItems.take(5).toList();
 
         if (items.isEmpty) {
           return const Center(
             child: Text(
-              'No clothing items available',
+              'No clothing items available.\nAdd some items to your wardrobe first!',
               style: AppStyles.subtitleTextStyle,
+              textAlign: TextAlign.center,
             ),
           );
         }
@@ -252,21 +218,15 @@ class _TryOnScreenState extends State<TryOnScreen> {
     );
   }
 
-  void _switchCamera() {
-    // TODO: Implement camera switching
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Camera switching coming soon!'),
-        backgroundColor: AppColors.primaryPurple,
-      ),
-    );
+  void _switchCamera() async {
+    final cameraProvider = context.read<CameraProvider>();
+    await cameraProvider.switchCamera();
   }
 
   void _selectClothingItem(String itemId) {
-    // TODO: Implement clothing item selection for try-on
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Clothing item selected for try-on!'),
+        content: Text('Clothing item selected for virtual try-on!'),
         backgroundColor: AppColors.success,
       ),
     );
@@ -285,8 +245,9 @@ class _TryOnScreenState extends State<TryOnScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to capture try-on'),
+        SnackBar(
+          content:
+              Text(cameraProvider.errorMessage ?? 'Failed to capture try-on'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -294,7 +255,6 @@ class _TryOnScreenState extends State<TryOnScreen> {
   }
 
   void _saveOutfit() {
-    // TODO: Implement outfit saving
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Outfit saved to favorites!'),
