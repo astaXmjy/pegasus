@@ -4,19 +4,21 @@ import 'core/routes/app_routes.dart';
 import 'providers/wardrobe_provider.dart';
 import 'providers/camera_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/ml_provider.dart'; // ADD THIS LINE
 import 'core/constants/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Don't initialize camera service here - let providers handle it
-  debugPrint('App starting...');
+  debugPrint('Dora App starting with AI capabilities...'); // ENHANCED MESSAGE
 
-  runApp(const StyleSwapApp());
+  runApp(const DoraApp()); // RENAMED from StyleSwapApp to DoraApp
 }
 
-class StyleSwapApp extends StatelessWidget {
-  const StyleSwapApp({Key? key}) : super(key: key);
+class DoraApp extends StatelessWidget {
+  // RENAMED class
+  const DoraApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +27,7 @@ class StyleSwapApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WardrobeProvider()),
         ChangeNotifierProvider(create: (_) => CameraProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => MLProvider()), // ADD THIS LINE
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
